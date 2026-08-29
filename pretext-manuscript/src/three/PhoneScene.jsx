@@ -16,6 +16,24 @@ const REST_Y = -0.32;
    lần rồi ctx được phóng theo. */
 const SS = 2;
 
+/* Bước thời gian tối đa cho một khung hình. Khi người dùng rời tab rồi quay lại,
+   khung đầu tiên có thể mang một delta rất lớn; chặn lại để hoạt ảnh không giật
+   nhảy một đoạn dài. */
+const MAX_STEP = 0.1;
+
+/* KHÔNG dùng clock.elapsedTime của R3F ở bất cứ đâu trong tệp này.
+   Mỗi lần prop frameloop đổi giá trị, R3F gọi setFrameloop, bên trong đó nó chạy
+   clock.stop(); clock.elapsedTime = 0; rồi clock.start() (Clock.start của three
+   cũng tự đặt elapsedTime = 0). Frameloop ở đây lật theo việc hero ra vào khung
+   nhìn, tức là lật mỗi lần chuyển tab. Hậu quả: đồng hồ nhảy ngược về 0, mọi
+   phép trừ "đã trôi qua bao lâu" thành số âm, và phần tiết chế nhịp vẽ đứng
+   vĩnh viễn: màn hình 3D chết cứng dù vẫn xoay và bấm được.
+   Vì vậy mỗi vòng lặp tự cộng dồn thời gian của riêng nó từ delta. */
+function advance(ref, delta) {
+  ref.current += Math.min(delta, MAX_STEP);
+  return ref.current;
+}
+
 /* Thân máy dựng bằng hình chữ nhật bo góc rồi ép khối. Không dùng hộp bo góc
    đều: hộp đều giới hạn bán kính theo chiều mỏng nhất nên góc máy sẽ quá nhọn. */
 function roundedRect(w, h, r) {
@@ -62,7 +80,7 @@ function useScreenTexture(playerRef, reduceMotion) {
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = 16;
-    return { canvas, ctx: canvas.getContext('2d'), texture, last: -1 };
+    return { canvas, ctx: canvas.getContext('2d'), texture, last: -1, time: { current: 0 } };
   }, []);
 
   // Chữ trên canvas phải đợi phông tải xong, nếu không nó vẽ bằng phông dự phòng
@@ -74,8 +92,8 @@ function useScreenTexture(playerRef, reduceMotion) {
     };
   }, [state]);
 
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
+  useFrame((_, delta) => {
+    const t = advance(state.time, delta);
     const player = playerRef.current;
     if (!player) return;
 
@@ -113,6 +131,7 @@ function useScreenTexture(playerRef, reduceMotion) {
 
 function Phone({ scrollRef, spinRef, playerRef, onScreenHit, reduceMotion }) {
   const group = useRef();
+  const time = useRef(0);
   const screenTexture = useScreenTexture(playerRef, reduceMotion);
 
   const bodyGeometry = useMemo(() => {
@@ -148,6 +167,7 @@ function Phone({ scrollRef, spinRef, playerRef, onScreenHit, reduceMotion }) {
 
   useFrame((s, delta) => {
     if (!group.current) return;
+    const t = advance(time, delta);
     const spin = spinRef.current;
 
     if (reduceMotion) {
@@ -176,8 +196,8 @@ function Phone({ scrollRef, spinRef, playerRef, onScreenHit, reduceMotion }) {
 
     group.current.rotation.y += (targetY - group.current.rotation.y) * k;
     group.current.rotation.x += (targetX - group.current.rotation.x) * k;
-    group.current.rotation.z = Math.sin(s.clock.elapsedTime * 0.4) * 0.025;
-    group.current.position.y = Math.sin(s.clock.elapsedTime * 0.7) * 0.08 - scroll * 1.2;
+    group.current.rotation.z = Math.sin(t * 0.4) * 0.025;
+    group.current.position.y = Math.sin(t * 0.7) * 0.08 - scroll * 1.2;
   });
 
   return (
@@ -208,6 +228,7 @@ function Phone({ scrollRef, spinRef, playerRef, onScreenHit, reduceMotion }) {
 
 function OrbitingTiles({ reduceMotion }) {
   const group = useRef();
+  const time = useRef(0);
   const tiles = useMemo(
     () => [
       { r: 2.1, y: 1.45, speed: 0.24, size: 0.34, accent: true, phase: 0 },
@@ -219,9 +240,9 @@ function OrbitingTiles({ reduceMotion }) {
     []
   );
 
-  useFrame(({ clock }) => {
+  useFrame((_, delta) => {
     if (!group.current || reduceMotion) return;
-    const t = clock.elapsedTime;
+    const t = advance(time, delta);
     group.current.children.forEach((child, i) => {
       const cfg = tiles[i];
       const a = cfg.phase + t * cfg.speed;
