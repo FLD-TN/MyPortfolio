@@ -16,7 +16,9 @@ const REPEL_RADIUS = 100;
 const REPEL_STRENGTH = 70;
 const EASING = 0.08;
 
-const MANUSCRIPT_TEXT = '“Dẫu sao, mình cứ hình dung ra cảnh lũ trẻ đang chơi một trò gì đó trên cánh đồng lúa mạch rộng lớn. Hàng ngàn đứa trẻ, và xung quanh chẳng có ai — ý mình là không có người lớn nào cả — ngoại trừ mình. Và mình đứng trên rìa của một vách đá điên rồ. Việc mình phải làm là bắt lấy bất cứ đứa nào lỡ chạy đến gần vách đá — ý mình là, nếu chúng đang mải chạy mà không nhìn xem mình đang đi đâu, thì mình sẽ nhảy ra từ một nơi nào đó và bắt lấy chúng. Đó là tất cả những gì mình làm cả ngày. Mình chỉ muốn làm người bắt trẻ đồng xanh.”';
+const MANUSCRIPT_TEXT = '“Dẫu sao, mình cứ hình dung ra cảnh lũ trẻ đang chơi một trò gì đó trên cánh đồng lúa mạch rộng lớn. Hàng ngàn đứa trẻ, và xung quanh chẳng có ai - ý mình là không có người lớn nào cả - ngoại trừ mình. Và mình đứng trên rìa của một vách đá điên rồ. Việc mình phải làm là bắt lấy bất cứ đứa nào lỡ chạy đến gần vách đá - ý mình là, nếu chúng đang mải chạy mà không nhìn xem mình đang đi đâu, thì mình sẽ nhảy ra từ một nơi nào đó và bắt lấy chúng. Đó là tất cả những gì mình làm cả ngày. Mình chỉ muốn làm người bắt trẻ đồng xanh.”';
+
+const HIDDEN_TEXT = 'Thật tốt vì bạn ở đây, chúc may mắn nhé !';
 
 // --- State ---
 let W = 0, H = 0;
@@ -25,6 +27,8 @@ let catX = -9999, catY = -9999;
 let lastFacingLeft = false;
 let charData = [];
 let prepared = null;
+let hiddenCharData = [];
+let hiddenPrepared = null;
 
 function buildCharLayout() {
   if (!prepared) return;
@@ -49,6 +53,23 @@ function buildCharLayout() {
         curX: x, curY: y, targetX: x, targetY: y, width: charWidth,
       });
       x += charWidth;
+    }
+  }
+  // Build hidden text layout (static positions)
+  if (hiddenPrepared) {
+    const hiddenResult = layoutWithLines(hiddenPrepared, maxW, LINE_HEIGHT);
+    const hiddenLines = hiddenResult.lines;
+    hiddenCharData = [];
+    for (let i = 0; i < hiddenLines.length; i++) {
+      const lineText = hiddenLines[i].text;
+      const y = startY + i * LINE_HEIGHT;
+      let x = startX;
+      for (let j = 0; j < lineText.length; j++) {
+        const ch = lineText[j];
+        const charWidth = ctx.measureText(ch).width;
+        hiddenCharData.push({ char: ch, x: x, y: y });
+        x += charWidth;
+      }
     }
   }
 }
@@ -77,6 +98,31 @@ window.addEventListener('resize', resize);
 function render() {
   ctx.fillStyle = BG_COLOR;
   ctx.fillRect(0, 0, W, H);
+
+  // Magnifying glass: reveal hidden text underneath
+  if (hiddenCharData.length > 0) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(catX, catY, REPEL_RADIUS, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.fillStyle = '#ede5d0';
+    ctx.fillRect(catX - REPEL_RADIUS, catY - REPEL_RADIUS, REPEL_RADIUS * 2, REPEL_RADIUS * 2);
+    ctx.fillStyle = '#8b4513';
+    ctx.font = FONT;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
+    for (let i = 0; i < hiddenCharData.length; i++) {
+      const c = hiddenCharData[i];
+      ctx.fillText(c.char, c.x, c.y);
+    }
+    ctx.restore();
+    // Subtle lens border
+    ctx.beginPath();
+    ctx.arc(catX, catY, REPEL_RADIUS, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(42, 26, 10, 0.15)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
 
   // Smooth cat easing
   catX += (mouseX - catX) * EASING;
@@ -128,6 +174,7 @@ function render() {
 document.fonts.ready.then(() => {
   resize();
   prepared = prepareWithSegments(MANUSCRIPT_TEXT, FONT, { whiteSpace: 'normal' });
+  hiddenPrepared = prepareWithSegments(HIDDEN_TEXT, FONT, { whiteSpace: 'normal' });
   buildCharLayout();
   requestAnimationFrame(render);
 });
