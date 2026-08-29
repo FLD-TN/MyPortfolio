@@ -1,4 +1,4 @@
-﻿import { prepareWithSegments, layoutWithLines } from '@chenglou/pretext';
+import { prepareWithSegments, layoutWithLines } from '@chenglou/pretext';
 
 // --- Canvas Setup ---
 const canvas = document.getElementById('manuscript');
@@ -28,7 +28,7 @@ let prepared = null;
 
 function buildCharLayout() {
   if (!prepared) return;
-  const padding = W > 900 ? 120 : 40;
+  const padding = W * 0.2;
   const maxW = Math.max(280, W - padding * 2);
   const result = layoutWithLines(prepared, maxW, LINE_HEIGHT);
   const lines = result.lines;
