@@ -16,7 +16,7 @@ const REPEL_RADIUS = 100;
 const REPEL_STRENGTH = 70;
 const EASING = 0.08;
 
-const MANUSCRIPT_TEXT = 'The candle was her thirteenth. The abbess had confiscated the first twelve, and Sable had found more each time and stolen another from the stores. She kept reading by its unsteady light, hunched beneath her wool blanket in the scriptorium where the novices slept on straw pallets between the copying desks. It was the bestiary that held her. Not the psalter, not the gospels, not the lives of saints with their wooden sufferings. The bestiary. Some brother at Lindisfarne had painted it two centuries ago, and his creatures had a quality she could not name, a weight to them, as if they had been observed from life rather than copied from pattern books. His lions looked hungry. His basilisks looked bored. And his cat, coiled in the lower margin of the forty-seventh leaf, looked like it was breathing. She had watched it for six nights before she was certain. The movement was slight, a swelling of the ribs, a settling, barely more than the flicker the candlelight threw across the page.';
+const MANUSCRIPT_TEXT = '“Dẫu sao, mình cứ hình dung ra cảnh lũ trẻ đang chơi một trò gì đó trên cánh đồng lúa mạch rộng lớn. Hàng ngàn đứa trẻ, và xung quanh chẳng có ai — ý mình là không có người lớn nào cả — ngoại trừ mình. Và mình đứng trên rìa của một vách đá điên rồ. Việc mình phải làm là bắt lấy bất cứ đứa nào lỡ chạy đến gần vách đá — ý mình là, nếu chúng đang mải chạy mà không nhìn xem mình đang đi đâu, thì mình sẽ nhảy ra từ một nơi nào đó và bắt lấy chúng. Đó là tất cả những gì mình làm cả ngày. Mình chỉ muốn làm người bắt trẻ đồng xanh.”';
 
 // --- State ---
 let W = 0, H = 0;
