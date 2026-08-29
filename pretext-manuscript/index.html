@@ -1,19 +1,27 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Illustrated Manuscript with Cat</title>
-    <link rel="stylesheet" href="/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#08090a" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- TODO: đổi tên hiển thị và mô tả thật trước khi deploy -->
+    <title>Portfolio</title>
+    <meta
+      name="description"
+      content="Portfolio của FLD-TN. Ứng dụng di động iOS, Android và Flutter: mượt ở 120fps, chạy được khi mất mạng, nhẹ pin."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="FLD-TN - Lập trình viên mobile" />
+    <meta
+      property="og:description"
+      content="Ứng dụng di động iOS, Android và Flutter: mượt ở 120fps, chạy được khi mất mạng, nhẹ pin."
+    />
   </head>
+
   <body>
-    <canvas id="manuscript"></canvas>
-    <img id="cat" src="/assets/Main.gif" alt="cat" />
-    <div class="attribution">By <a href="#" target="_blank">Pretext + Cat</a></div>
-    <script type="module" src="/main.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

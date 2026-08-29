@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+
+/* =========================================================================
+   FLD-TN - portfolio lập trình viên mobile
+   Thẩm mỹ: dark tech / app-native. Không phải một design system chính thức nào.
+
+   KHOÁ CHỦ ĐỀ   : tối, toàn trang. Không section nào đảo sang nền sáng.
+   KHOÁ MÀU NHẤN : đúng một màu, --color-accent (spring green). Dùng ở mọi nơi.
+   KHOÁ HÌNH DẠNG: nút và chip = bo tròn hết (pill).
+                   thẻ và panel  = 20px.
+                   ô nhập và chi tiết nhỏ = 12px.
+                   Quy tắc này áp dụng không ngoại lệ.
+   ========================================================================= */
+
+@theme {
+  --color-bg: #08090a;
+  --color-surface: #101214;
+  --color-surface-2: #17191c;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
+  --color-ink: #f2f3f5;
+  --color-muted: #9ba1a6;
+  --color-accent: #4ade80;
+  --color-accent-dim: #22c55e;
+
+  --font-display: 'Outfit Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, Menlo, monospace;
+
+  --radius-card: 20px;
+  --radius-input: 12px;
+
+  --ease-out-quint: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Thanh điều hướng cố định cao 68px. Không có dòng này thì mỗi lần bấm liên
+     kết neo, đầu section chui xuống dưới thanh nav và trông như trang trống. */
+  section[id] {
+    scroll-margin-top: 88px;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    /* clip chứ không phải hidden: hidden biến body thành hộp cuộn và làm hỏng
+       position: sticky của các thẻ dự án. clip chỉ cắt, không tạo hộp cuộn. */
+    overflow-x: clip;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  /* Hiện dần khi cuộn tới. Trạng thái ẩn CHỈ áp dụng khi JS đã chạy (cờ
+     data-js được đặt trong main.jsx trước lần vẽ đầu tiên). Không có cờ đó thì
+     mọi thứ hiện bình thường, nên kịch bản hỏng không bao giờ làm trắng trang. */
+  [data-js='on'] [data-reveal] {
+    opacity: 0;
+    transform: translateY(var(--reveal-y, 22px));
+    transition:
+      opacity 0.75s var(--ease-out-quint) var(--reveal-delay, 0ms),
+      transform 0.75s var(--ease-out-quint) var(--reveal-delay, 0ms);
+  }
+  [data-js='on'] [data-reveal][data-shown='true'] {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-js='on'] [data-reveal] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* Nền lưới rất mờ: cho các mảng tối lớn có chất liệu thay vì phẳng lì */
+  .grid-field {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  /* Quầng sáng màu nhấn, đặt sau nội dung, không bao giờ chắn con trỏ */
+  .accent-bloom {
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+    filter: blur(90px);
+    background: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--color-accent) 26%, transparent) 0%,
+      transparent 70%
+    );
+  }
+}
+
+/* Thanh cuộn ngang trong các dải cuộn: ẩn nhưng vẫn cuộn được */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
