@@ -226,45 +226,78 @@ function Phone({ scrollRef, spinRef, playerRef, onScreenHit, reduceMotion }) {
   );
 }
 
-function OrbitingTiles({ reduceMotion }) {
+/* Các hạt bay quanh máy.
+
+   Chúng không còn là trang trí suông: bán kính và độ phát sáng bám theo năng
+   lượng của một dải tần số lấy từ AnalyserNode, tức là đúng bản nhạc đang phát.
+   Dừng nhạc thì chúng lặng về kích thước gốc.
+
+   band là chỉ số ô tần số. fftSize = 128 nên có 64 ô trải từ 0 tới khoảng
+   22 kHz; các ô đầu là dải trầm và trung, nơi nhạc có năng lượng thật.
+
+   lift làm nghiêng mặt phẳng quỹ đạo. Quỹ đạo tròn nằm ngang thì lúc hạt ra
+   phía trước máy nó rơi đúng vào x = 0, tức chính giữa màn hình, và trông như
+   một vết bẩn dính trên giao diện. Nghiêng đi thì lúc ở gần người xem nhất hạt
+   cũng đồng thời bị đẩy lên trên hoặc xuống dưới, ra khỏi thân máy. */
+const PARTICLES = [
+  { r: 2.1, y: 1.45, lift: 1.2, speed: 0.24, size: 0.34, phase: 0, band: 2, glow: 1.0 },
+  { r: 2.4, y: -0.6, lift: -1.9, speed: -0.18, size: 0.27, phase: 1.7, band: 5, glow: 0.7 },
+  { r: 1.95, y: -1.6, lift: -1.0, speed: 0.3, size: 0.23, phase: 3.1, band: 8, glow: 1.0 },
+  { r: 2.55, y: 0.7, lift: 1.8, speed: -0.22, size: 0.19, phase: 4.6, band: 12, glow: 0.55 },
+  { r: 2.25, y: 2.0, lift: 0.8, speed: 0.2, size: 0.16, phase: 5.5, band: 17, glow: 0.85 },
+];
+
+function OrbitingParticles({ playerRef, reduceMotion }) {
   const group = useRef();
   const time = useRef(0);
-  const tiles = useMemo(
-    () => [
-      { r: 2.1, y: 1.45, speed: 0.24, size: 0.34, accent: true, phase: 0 },
-      { r: 2.4, y: -0.6, speed: -0.18, size: 0.27, accent: false, phase: 1.7 },
-      { r: 1.95, y: -1.6, speed: 0.3, size: 0.23, accent: true, phase: 3.1 },
-      { r: 2.55, y: 0.7, speed: -0.22, size: 0.19, accent: false, phase: 4.6 },
-      { r: 2.25, y: 2.0, speed: 0.2, size: 0.16, accent: true, phase: 5.5 },
-    ],
-    []
-  );
+  // Mức đã làm mượt của từng hạt, giữ ngoài React để không render lại mỗi khung
+  const smooth = useRef(PARTICLES.map(() => 0));
 
   useFrame((_, delta) => {
     if (!group.current || reduceMotion) return;
     const t = advance(time, delta);
+    const freq = playerRef.current?.levels() ?? null;
+    const k = Math.min(1, delta * 11);
+
     group.current.children.forEach((child, i) => {
-      const cfg = tiles[i];
+      const cfg = PARTICLES[i];
+
       const a = cfg.phase + t * cfg.speed;
-      child.position.set(Math.cos(a) * cfg.r, cfg.y + Math.sin(t * 0.5 + cfg.phase) * 0.16, Math.sin(a) * cfg.r);
-      child.rotation.y = a;
-      child.rotation.x = Math.sin(t * 0.4 + cfg.phase) * 0.3;
+      const front = Math.sin(a); // 1 khi ở gần người xem nhất, -1 khi ở xa nhất
+      child.position.set(
+        Math.cos(a) * cfg.r,
+        cfg.y + front * cfg.lift + Math.sin(t * 0.5 + cfg.phase) * 0.16,
+        front * cfg.r
+      );
+
+      // Không có dữ liệu phổ (đang dừng, hoặc nguồn nhạc không cho phân tích)
+      // thì mục tiêu bằng 0 và hạt tự lắng về trạng thái nghỉ.
+      const target = freq ? freq[cfg.band] / 255 : 0;
+      const level = smooth.current[i] + (target - smooth.current[i]) * k;
+      smooth.current[i] = level;
+
+      child.scale.setScalar(1 + level * 1.7);
+      child.material.emissiveIntensity = cfg.glow * (0.5 + level * 3);
     });
   });
 
   return (
     <group ref={group}>
-      {tiles.map((cfg, i) => {
+      {PARTICLES.map((cfg, i) => {
         const a = cfg.phase;
         return (
-          <mesh key={i} position={[Math.cos(a) * cfg.r, cfg.y, Math.sin(a) * cfg.r]}>
-            <boxGeometry args={[cfg.size, cfg.size, cfg.size * 0.28]} />
+          <mesh
+            key={i}
+            position={[Math.cos(a) * cfg.r, cfg.y + Math.sin(a) * cfg.lift, Math.sin(a) * cfg.r]}
+          >
+            {/* Đường kính bằng nửa bề ngang khối hộp cũ */}
+            <sphereGeometry args={[cfg.size * 0.25, 20, 20]} />
             <meshStandardMaterial
-              color={cfg.accent ? ACCENT : '#464e57'}
-              emissive={cfg.accent ? ACCENT : '#0b0d10'}
-              emissiveIntensity={cfg.accent ? 0.9 : 0}
-              metalness={0.55}
-              roughness={0.32}
+              color={ACCENT}
+              emissive={ACCENT}
+              emissiveIntensity={cfg.glow * 0.5}
+              metalness={0.3}
+              roughness={0.35}
             />
           </mesh>
         );
@@ -301,7 +334,7 @@ export default function PhoneScene({
         onScreenHit={onScreenHit}
         reduceMotion={reduceMotion}
       />
-      <OrbitingTiles reduceMotion={reduceMotion} />
+      <OrbitingParticles playerRef={playerRef} reduceMotion={reduceMotion} />
 
       <ContactShadows position={[0, -2.9, 0]} opacity={0.5} scale={11} blur={2.8} far={4.5} color="#000000" />
     </Canvas>
