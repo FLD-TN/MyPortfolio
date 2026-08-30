@@ -47,7 +47,6 @@ export const projectGroups = [
   {
     id: 'mobile',
     label: 'Ứng dụng di động',
-    blurb: 'Ba sản phẩm, ba nền tảng. Mỗi cái giải một bài toán hẹp thay vì làm tất cả mọi thứ.',
     projects: [
       {
         id: 'flood-aid',
@@ -95,7 +94,7 @@ export const projectGroups = [
   },
   {
     id: 'khac',
-    label: 'Plugin và web',
+    label: 'Các dự án khác',
     blurb: 'Việc làm ngoài giờ. Hai plugin máy chủ Minecraft và một trang web chơi Tết.',
     projects: [
       {

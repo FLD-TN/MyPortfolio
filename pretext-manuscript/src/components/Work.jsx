@@ -250,7 +250,7 @@ export default function Work() {
   return (
     <section id="du-an" className="mx-auto w-full max-w-[1240px] px-5 py-24 sm:px-8 md:py-32 lg:px-12">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
-        <SectionHeading className="max-w-[16ch]">Ứng dụng đã làm</SectionHeading>
+        <SectionHeading className="max-w-[16ch]">Dự án cá nhân</SectionHeading>
         <Reveal delay={0.1}>
           <p className="max-w-[34ch] text-[15px] text-muted">{group.blurb}</p>
         </Reveal>

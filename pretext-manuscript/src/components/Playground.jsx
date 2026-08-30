@@ -9,11 +9,7 @@ export default function Playground() {
 
       <div className="relative mb-12 flex flex-wrap items-end justify-between gap-6 md:mb-16">
         <SectionHeading className="max-w-[14ch]">Sân chơi</SectionHeading>
-        <Reveal delay={0.1}>
-          <p className="max-w-[36ch] text-[15px] text-muted">
-            Hai thứ bấm được. Không có gì để bán ở đây, chỉ là chỗ tôi thử ý tưởng về cảm giác chạm.
-          </p>
-        </Reveal>
+  
       </div>
 
       {/* Bento hai ô, đúng bằng số nội dung đang có */}
