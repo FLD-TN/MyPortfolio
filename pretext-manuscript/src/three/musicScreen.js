@@ -176,6 +176,22 @@ function playIcon(ctx, cx, cy, playing) {
   }
 }
 
+/* Vòng xoay hở một đoạn. Vẫn nằm trong đúng khối tròn màu nhấn của nút phát,
+   nên khi nhạc kêu nó biến thành nút tạm dừng ngay tại chỗ: mắt bám theo được
+   một vật thể duy nhất thay vì thấy hai thứ khác nhau nhấp nháy. */
+function spinnerIcon(ctx, cx, cy, t) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(t * 3.4);
+  ctx.strokeStyle = '#08090a';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(0, 0, 14, 0, Math.PI * 1.45);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function skipIcon(ctx, cx, cy, dir) {
   ctx.save();
   ctx.translate(cx, cy);
@@ -237,6 +253,8 @@ function emptyState(ctx) {
 
 export function drawMusicScreen(ctx, state, t, art) {
   const { track, playing, progress, volume, duration, elapsed, error, hasTracks, levels } = state;
+  const loading = state.loading && !error;
+  const buffered = state.buffered ?? 0;
 
   if (!hasTracks || !track) return emptyState(ctx);
 
@@ -251,13 +269,21 @@ export function drawMusicScreen(ctx, state, t, art) {
   const pb = { ...BARS.progress, y: 566 };
   ctx.fillStyle = 'rgba(255,255,255,0.1)';
   rr(ctx, pb.x, pb.y, pb.w, 6, 3);
+  // Vệt đệm: cho thấy nhạc đã tải tới đâu, nằm dưới vạch tiến trình
+  if (buffered > 0.001) {
+    ctx.fillStyle = 'rgba(255,255,255,0.24)';
+    rr(ctx, pb.x, pb.y, Math.max(6, pb.w * buffered), 6, 3);
+  }
   ctx.fillStyle = ACCENT;
   rr(ctx, pb.x, pb.y, Math.max(6, pb.w * progress), 6, 3);
   ctx.beginPath();
   ctx.arc(pb.x + pb.w * progress, pb.y + 3, 8, 0, Math.PI * 2);
   ctx.fill();
 
-  text(ctx, mmss(elapsed), pb.x, pb.y + 30, { size: 12, color: MUTED });
+  text(ctx, loading ? 'Đang tải…' : mmss(elapsed), pb.x, pb.y + 30, {
+    size: 12,
+    color: loading ? ACCENT : MUTED,
+  });
   text(ctx, duration ? mmss(duration) : '--:--', pb.x + pb.w, pb.y + 30, {
     size: 12, color: MUTED, align: 'right',
   });
@@ -268,7 +294,7 @@ export function drawMusicScreen(ctx, state, t, art) {
 
   const tcx = HITS.toggle.x + HITS.toggle.w / 2;
   const tcy = HITS.toggle.y + HITS.toggle.h / 2;
-  if (playing) {
+  if (playing || loading) {
     ctx.fillStyle = 'rgba(74,222,128,0.18)';
     ctx.beginPath();
     ctx.arc(tcx, tcy, 42 + Math.sin(t * 2.2) * 3, 0, Math.PI * 2);
@@ -278,7 +304,8 @@ export function drawMusicScreen(ctx, state, t, art) {
   ctx.beginPath();
   ctx.arc(tcx, tcy, 36, 0, Math.PI * 2);
   ctx.fill();
-  playIcon(ctx, tcx, tcy, playing);
+  if (loading) spinnerIcon(ctx, tcx, tcy, t);
+  else playIcon(ctx, tcx, tcy, playing);
 
   // Âm lượng
   speakerIcon(ctx, 34, 786, volume < 0.02);

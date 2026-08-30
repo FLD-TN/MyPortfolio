@@ -32,6 +32,11 @@ export class AudioPlayer {
     this.index = 0;
     this.volume = 0.7;
     this.playing = false;
+    /* Người dùng đã yêu cầu phát nhưng chưa có tiếng ra: hoặc đang tải, hoặc
+       đang phải chờ nạp thêm giữa chừng. Tệp nhạc ở đây nặng 6-9 MB nên trên
+       mạng chậm khoảng chờ này rất dễ thấy, không có dấu hiệu gì thì người xem
+       tưởng bấm hụt. */
+    this.loading = false;
     this.error = null;
     this.onChange = null;
     this._gen = 0;
@@ -58,6 +63,7 @@ export class AudioPlayer {
 
       this.audio.addEventListener('ended', () => this.next());
       this.audio.addEventListener('error', () => {
+        this.loading = false;
         // Chỉ tính là lỗi khi phần tử audio thật sự báo mã lỗi. Sự kiện này còn
         // bắn ra khi src bị đổi giữa chừng, lúc đó không có mã lỗi nào cả.
         if (!this.audio.error) return;
@@ -75,7 +81,27 @@ export class AudioPlayer {
       });
       this.audio.addEventListener('pause', () => {
         this.playing = false;
+        this.loading = false;
         this._notify();
+      });
+
+      /* playing bắn ra đúng lúc có tiếng thật, kể cả sau khi phải dừng chờ nạp
+         giữa bài. canplay thì chỉ nói là đủ dữ liệu, chưa chắc đã kêu. */
+      this.audio.addEventListener('playing', () => {
+        this.loading = false;
+        this._notify();
+      });
+      this.audio.addEventListener('waiting', () => {
+        if (!this.audio.paused) {
+          this.loading = true;
+          this._notify();
+        }
+      });
+      this.audio.addEventListener('stalled', () => {
+        if (!this.audio.paused) {
+          this.loading = true;
+          this._notify();
+        }
       });
 
       this._load();
@@ -101,6 +127,19 @@ export class AudioPlayer {
 
   get progress() {
     return this.duration ? Math.min(1, this.elapsed / this.duration) : 0;
+  }
+
+  /* Tỉ lệ đã tải xong tính từ đầu bài, dùng vẽ vệt mờ phía sau thanh tiến trình
+     để thấy nhạc đang được nạp tới đâu. */
+  get buffered() {
+    const b = this.audio?.buffered;
+    if (!b || !b.length || !this.duration) return 0;
+    for (let i = 0; i < b.length; i++) {
+      if (b.start(i) <= this.elapsed && this.elapsed <= b.end(i)) {
+        return Math.min(1, b.end(i) / this.duration);
+      }
+    }
+    return Math.min(1, b.end(b.length - 1) / this.duration);
   }
 
   _notify() {
@@ -159,6 +198,8 @@ export class AudioPlayer {
 
     const gen = this._gen;
     const src = this.track.src;
+    this.loading = true;
+    this._notify();
     try {
       await this.audio.play();
     } catch (err) {
@@ -168,11 +209,13 @@ export class AudioPlayer {
       if (err && err.name === 'AbortError') return;
       this.error = src;
       this.playing = false;
+      this.loading = false;
       this._notify();
     }
   }
 
   pause() {
+    this.loading = false;
     this.audio?.pause();
   }
 

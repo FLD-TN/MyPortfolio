@@ -97,8 +97,10 @@ function useScreenTexture(playerRef, reduceMotion) {
     const player = playerRef.current;
     if (!player) return;
 
-    // Đang phát thì vẽ lại đều để dải phổ nhảy, dừng thì chỉ vẽ khi có thay đổi
-    const rate = player.playing && !reduceMotion ? 1 / 24 : 1 / 6;
+    /* Đang phát thì vẽ lại đều để dải phổ nhảy. Đang tải cũng phải vẽ đều,
+       nếu không vòng xoay giật cục ở 6 hình một giây và trông như treo. */
+    const busy = player.playing || player.loading;
+    const rate = busy && !reduceMotion ? 1 / 24 : 1 / 6;
     if (state.last >= 0 && t - state.last < rate) return;
     state.last = t;
 
@@ -117,6 +119,8 @@ function useScreenTexture(playerRef, reduceMotion) {
         elapsed: player.elapsed,
         error: player.error,
         hasTracks: player.hasTracks,
+        loading: player.loading,
+        buffered: player.buffered,
         levels: reduceMotion ? null : player.levels(),
       },
       reduceMotion ? 0 : t,

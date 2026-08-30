@@ -9,6 +9,7 @@ import {
   SkipBackIcon,
   SkipForwardIcon,
   SpeakerHighIcon,
+  CircleNotchIcon,
 } from '@phosphor-icons/react';
 import { profile } from '../data.js';
 import { AudioPlayer } from '../audio/audioPlayer.js';
@@ -34,7 +35,14 @@ export default function Hero() {
   if (playerRef.current === null && typeof window !== 'undefined') {
     playerRef.current = new AudioPlayer();
   }
-  const [ui, setUi] = useState({ playing: false, index: 0, volume: 0.7, error: null, total: 0 });
+  const [ui, setUi] = useState({
+    playing: false,
+    loading: false,
+    index: 0,
+    volume: 0.7,
+    error: null,
+    total: 0,
+  });
 
   const spinRef = useRef({ dragging: false, offsetX: 0, offsetY: 0, velX: 0, velY: 0 });
   const dragRef = useRef({ id: null, x: 0, y: 0, moved: 0 });
@@ -53,6 +61,7 @@ export default function Hero() {
     player.onChange = () =>
       setUi({
         playing: player.playing,
+        loading: player.loading,
         index: player.index,
         volume: player.volume,
         error: player.error,
@@ -273,9 +282,11 @@ export default function Hero() {
               <p className="truncate font-mono text-[11px] text-muted">
                 {ui.error
                   ? `Không tải được ${ui.error}`
-                  : track
-                    ? `${track.artist} · bài ${ui.index + 1}/${ui.total}`
-                    : 'Thêm tệp vào public/music/'}
+                  : ui.loading
+                    ? 'Đang tải nhạc…'
+                    : track
+                      ? `${track.artist} · bài ${ui.index + 1}/${ui.total}`
+                      : 'Thêm tệp vào public/music/'}
               </p>
             </div>
 
@@ -291,11 +302,18 @@ export default function Hero() {
               <button
                 type="button"
                 onClick={() => playerRef.current?.toggle()}
-                aria-label={ui.playing ? 'Tạm dừng' : 'Phát nhạc'}
+                aria-label={ui.loading ? 'Đang tải nhạc' : ui.playing ? 'Tạm dừng' : 'Phát nhạc'}
                 aria-pressed={ui.playing}
+                aria-busy={ui.loading || undefined}
                 className="flex size-10 items-center justify-center rounded-full bg-accent text-bg transition-transform active:scale-95"
               >
-                {ui.playing ? <PauseIcon size={18} weight="fill" /> : <PlayIcon size={18} weight="fill" />}
+                {ui.loading ? (
+                  <CircleNotchIcon size={18} weight="bold" className="animate-spin" />
+                ) : ui.playing ? (
+                  <PauseIcon size={18} weight="fill" />
+                ) : (
+                  <PlayIcon size={18} weight="fill" />
+                )}
               </button>
               <button
                 type="button"
