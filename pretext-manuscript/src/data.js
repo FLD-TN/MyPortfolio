@@ -1,76 +1,87 @@
 /* =========================================================================
-   NỘI DUNG TẠM. Mọi thứ trong file này là dữ liệu giả để dựng giao diện.
-   Thay bằng thông tin thật trước khi deploy. Không có số liệu nào ở đây là
-   thật, nên file cố tình KHÔNG chứa lượt tải, doanh thu hay đánh giá sao.
+   NỘI DUNG TRANG.
+
+   Ba dự án bên dưới là DỰ ÁN THẬT, đọc từ chính kho mã trên GitHub của bạn:
+   README, cây thư mục, tệp khai báo phụ thuộc. Không có con số nào bịa ra, và
+   file cố tình không chứa lượt tải hay đánh giá sao.
+
+   ẢNH: screenshot để trống thì khung máy hiện thẻ OpenGraph của repo. Muốn đẹp
+   hơn thì chụp màn hình ứng dụng, bỏ vào  public/screens/  rồi điền đường dẫn
+   dạng '/screens/ten-tep.png'. Ảnh trong README GitHub KHÔNG nhúng được: chúng
+   là URL có chữ ký, gọi từ tên miền khác sẽ bị trả 403.
    ========================================================================= */
 
 export const profile = {
-  // TODO: tên hiển thị thật
   name: 'fld-tn',
   role: 'Lập trình viên mobile',
-  headline: ['Hello, I\'m', 'Trần Anh Duy .'],
+  headline: ["Hello, I'm", 'Trần Anh Duy .'],
   blurb:
     'I am a software developer with a special bias towards creativity and innovation. Currently in my third year at Ho Chi Minh City University of Foreign Languages - Information Technology (HUFLIT), I am deeply passionate about building impactful solutions.',
-  // TODO: email thật. Để trống nên nút sẽ không mở trình gửi thư.
   email: 'duyhsne@gmail.com',
-  // TODO: link thật
   github: 'https://github.com/FLD-TN',
+  // TODO: link thật, để '#' thì nút vẫn hiện nhưng bấm không đi đâu
   linkedin: '#',
 };
 
+/* Chỉ liệt kê thứ thật sự xuất hiện trong ba kho mã ở dưới. */
 export const stack = [
-  'Swift',
-  'SwiftUI',
-  'Kotlin',
-  'Jetpack Compose',
   'Flutter',
   'Dart',
-  'React Native',
-  'Core Animation',
-  'Room',
-  'SQLite',
+  'Java',
+  'Android SDK',
+  'Node.js',
+  'Express',
+  'PostgreSQL',
+  'PostGIS',
+  'React',
   'Firebase',
-  'Fastlane',
+  'SQLite',
+  'WebSocket',
+  'Retrofit',
+  'Gemini API',
 ];
 
-/* Tên ứng dụng là từ tiếng Việt có nghĩa, không phải tên startup chung chung.
-   TODO: thay bằng dự án thật của bạn. */
 export const projects = [
   {
-    id: 'sai',
-    name: 'Sải',
-    platform: 'iOS · SwiftUI',
-    year: '2025',
-    tagline: 'Đo quãng chạy khi không có sóng',
-    body: 'Ứng dụng chạy bộ ghi lại lộ trình hoàn toàn dưới máy. Dữ liệu nằm ở thiết bị, đồng bộ lên mây chỉ khi người dùng chủ động bật.',
-    tags: ['SwiftUI', 'Core Location', 'Offline-first'],
+    id: 'flood-aid',
+    name: 'FloodAid',
+    platform: 'Flutter · Node.js · React',
+    year: '2026',
+    tagline: 'Điều phối cứu trợ lũ lụt theo thời gian thực',
+    body: 'Khoá luận tốt nghiệp HUFLIT. Người gặp nạn gửi tín hiệu bằng giọng nói, hệ thống chấm mức khẩn cấp rồi tìm tình nguyện viên gần nhất. Chuẩn hoá phương ngữ Miền Trung chạy ngay trên máy nên mất mạng vẫn hiểu được lời kêu cứu.',
+    tags: ['Flutter', 'PostGIS', 'WebSocket', 'Gemini', 'eKYC'],
+    repo: 'https://github.com/FLD-TN/Flood-aid',
+    screenshot: '',
     accentTilt: -6,
-    seed: 'sai-running-trail',
   },
   {
-    id: 'chon',
-    name: 'Chốn',
-    platform: 'Android · Compose',
-    year: '2024',
-    tagline: 'Nhật ký nơi chốn, không cần tài khoản',
-    body: 'Người dùng ghim ảnh và ghi chú lên bản đồ riêng. Không đăng nhập, không theo dõi, mọi thứ nằm trong một tệp có thể tự sao lưu.',
-    tags: ['Jetpack Compose', 'Room', 'MapLibre'],
+    id: 'quan-li-truyen',
+    name: 'Quản Lí Truyện',
+    platform: 'Android · Java',
+    year: '2025',
+    tagline: 'Đọc truyện offline, thư viện nằm trong máy',
+    body: 'Nhập truyện từ tệp .cbz, đọc theo kiểu lật ngang như sách hoặc cuộn dọc như webtoon. Chọn được mức chất lượng ảnh để tiết kiệm dung lượng, tự nhớ trang đang đọc dở, và thống kê thói quen đọc theo ngày, tuần, tháng.',
+    tags: ['Java', 'SQLite', 'Glide', 'ViewPager2'],
+    repo: 'https://github.com/FLD-TN/QuanLiTruyen',
+    screenshot: '',
     accentTilt: 5,
-    seed: 'chon-map-journal',
   },
   {
-    id: 'nhip',
-    name: 'Nhịp',
-    platform: 'Flutter · đa nền tảng',
-    year: '2024',
-    tagline: 'Theo dõi thói quen bằng một cử chỉ',
-    body: 'Toàn bộ thao tác chính nằm trong vùng ngón cái. Đánh dấu xong một việc chỉ mất một lần vuốt, kèm phản hồi rung theo nhịp.',
-    tags: ['Flutter', 'Riverpod', 'Haptics'],
+    id: 'online-food-shop',
+    name: 'OnlineFoodShop',
+    platform: 'Android · Java · Firebase',
+    year: '2025',
+    tagline: 'Đặt đồ ăn, kèm trang quản trị đầy đủ',
+    body: 'Hai vai trong cùng một ứng dụng. Khách duyệt món, bỏ giỏ, thanh toán và theo dõi đơn. Quản trị viên quản lý món, danh mục, đơn hàng, người dùng, mã giảm giá và thông báo đẩy.',
+    tags: ['Java', 'Firebase', 'Retrofit', 'Google Sign-In'],
+    repo: 'https://github.com/FLD-TN/OnlineFoodShop',
+    screenshot: '',
     accentTilt: -4,
-    seed: 'nhip-habit-rhythm',
   },
 ];
 
+/* TODO: đây là cách làm tôi phỏng đoán lúc dựng giao diện, chưa đối chiếu với
+   cách bạn thật sự làm việc. Sửa lại cho đúng, hoặc bỏ bớt mục nào không phải. */
 export const craft = [
   {
     icon: 'hand',
@@ -79,7 +90,7 @@ export const craft = [
   },
   {
     icon: 'gauge',
-    title: 'Giữ nhịp 120fps',
+    title: 'Giữ nhịp mượt',
     body: 'Đo bằng công cụ của hệ điều hành chứ không đoán. Mọi hoạt ảnh chạy trên transform và opacity.',
   },
   {

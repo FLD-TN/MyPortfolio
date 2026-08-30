@@ -76,7 +76,7 @@ function statusBar(ctx) {
   ctx.arc(TEX_W / 2 + 30, 35, 5.5, 0, Math.PI * 2);
   ctx.fill();
 
-  text(ctx, '9:41', 30, 44, { size: 14, weight: 500 });
+  text(ctx, '12:04', 30, 44, { size: 18, weight: 500 });
   for (let i = 0; i < 4; i++) {
     ctx.fillStyle = i < 3 ? INK : 'rgba(242,243,245,0.3)';
     rr(ctx, TEX_W - 96 + i * 7, 40 - i * 2.5, 4.5, 6 + i * 2.5, 1.5);

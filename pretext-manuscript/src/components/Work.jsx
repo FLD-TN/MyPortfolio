@@ -4,30 +4,53 @@ import { ArrowUpRightIcon } from '@phosphor-icons/react';
 import { projects } from '../data.js';
 import { SectionHeading, Reveal } from './ui.jsx';
 
-/* Khung điện thoại dựng bằng CSS, ảnh thật nằm bên trong. Đây không phải giao
-   diện giả ghép từ thẻ div: nó là khung máy, phần nội dung là ảnh. */
-function PhoneFrame({ seed, tilt }) {
-  return (
-    <div
-      className="relative mx-auto aspect-[9/19] w-[190px] shrink-0 rounded-[34px] border border-line-strong bg-surface-2 p-[7px] shadow-[0_30px_70px_-20px_rgba(0,0,0,0.9)] sm:w-[215px] lg:w-[240px]"
-      style={{ transform: `rotate(${tilt}deg)` }}
-    >
-      <div className="absolute top-[7px] left-1/2 z-10 h-[18px] w-[74px] -translate-x-1/2 rounded-b-[11px] bg-surface-2" />
-      <div className="relative h-full w-full overflow-hidden rounded-[27px] bg-bg">
-        {/* TODO: thay bằng ảnh chụp màn hình thật của ứng dụng.
-            Ảnh tạm được khử màu và phủ sắc xanh để nó đọc như một mảng chất
-            liệu trong bảng màu, không giả vờ là ảnh chụp giao diện thật. */}
-        <img
-          src={`https://picsum.photos/seed/${seed}/540/1140`}
-          alt=""
-          width={540}
-          height={1140}
-          loading="lazy"
-          className="h-full w-full object-cover grayscale contrast-125 brightness-[0.55]"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(74,222,128,0.28)_0%,rgba(74,222,128,0.06)_45%,rgba(8,9,10,0.8)_100%)]" />
+/* Hai kiểu hình tuỳ theo có ảnh chụp thật hay không.
+
+   Có ảnh chụp màn hình (dọc) thì dựng khung điện thoại, đúng chất một sản phẩm
+   di động. Chưa có thì dùng thẻ OpenGraph của chính repo, nhưng thẻ đó là ảnh
+   NGANG tỉ lệ 2:1, nhét vào khung máy dọc sẽ teo lại giữa một mảng đen. Nên
+   trường hợp này bỏ khung máy, trình bày như một tấm thẻ ngang cho đúng khổ.
+
+   Ảnh nhúng trong README GitHub không dùng được ở đây: chúng là URL có chữ ký
+   và trả 403 khi gọi từ tên miền khác. Phải tự chép ảnh vào public/screens/. */
+function ProjectMedia({ project, tilt }) {
+  if (project.screenshot) {
+    return (
+      <div
+        className="relative mx-auto aspect-[9/19] w-[190px] shrink-0 rounded-[34px] border border-line-strong bg-surface-2 p-[7px] shadow-[0_30px_70px_-20px_rgba(0,0,0,0.9)] sm:w-[215px] lg:w-[240px]"
+        style={{ transform: `rotate(${tilt}deg)` }}
+      >
+        <div className="absolute top-[7px] left-1/2 z-10 h-[18px] w-[74px] -translate-x-1/2 rounded-b-[11px] bg-surface-2" />
+        <div className="relative h-full w-full overflow-hidden rounded-[27px] bg-bg">
+          <img
+            src={project.screenshot}
+            alt={`Ảnh chụp màn hình ${project.name}`}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  const repo = project.repo.split('/').pop();
+  return (
+    <a
+      href={project.repo}
+      target="_blank"
+      rel="noreferrer"
+      className="group relative block w-full shrink-0 overflow-hidden rounded-card border border-line bg-surface-2 md:w-[320px] lg:w-[380px]"
+    >
+      <img
+        src={`https://opengraph.githubassets.com/1/FLD-TN/${repo}`}
+        alt={`Thẻ kho mã ${project.name} trên GitHub`}
+        loading="lazy"
+        className="aspect-[2/1] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+      />
+      <p className="border-t border-line px-4 py-2.5 font-mono text-[11px] text-muted">
+        github.com/FLD-TN/{repo}
+      </p>
+    </a>
   );
 }
 
@@ -72,17 +95,18 @@ function ProjectCard({ project, index }) {
             ))}
           </ul>
 
-          {/* TODO: điền link thật tới trang ứng dụng */}
           <a
-            href="#"
+            href={project.repo}
+            target="_blank"
+            rel="noreferrer"
             className="mt-8 inline-flex items-center gap-1.5 border-b border-accent/40 pb-0.5 text-[15px] text-accent transition-colors hover:border-accent"
           >
-            Xem chi tiết
+            Xem mã nguồn
             <ArrowUpRightIcon size={16} weight="bold" />
           </a>
         </div>
 
-        <PhoneFrame seed={project.seed} tilt={project.accentTilt} />
+        <ProjectMedia project={project} tilt={project.accentTilt} />
       </motion.article>
     </div>
   );

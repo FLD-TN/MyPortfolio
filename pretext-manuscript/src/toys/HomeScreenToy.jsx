@@ -42,7 +42,7 @@ export default function HomeScreenToy() {
 
         {/* Thanh trạng thái */}
         <div className="relative flex items-center justify-between px-2 pt-1 pb-3 font-mono text-[10px] text-muted">
-          <span>9:41</span>
+          <span>12:04</span>
           <span className="h-[3px] w-9 rounded-full bg-ink/25" />
           <span>100%</span>
         </div>
