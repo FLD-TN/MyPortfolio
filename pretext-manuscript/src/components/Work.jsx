@@ -1,7 +1,7 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react';
-import { ArrowUpRightIcon } from '@phosphor-icons/react';
-import { projects } from '../data.js';
+import { ArrowUpRightIcon, ArrowSquareOutIcon, GithubLogoIcon } from '@phosphor-icons/react';
+import { projectGroups } from '../data.js';
 import { SectionHeading, Reveal } from './ui.jsx';
 
 /* Hai kiểu hình tuỳ theo có ảnh chụp thật hay không.
@@ -14,6 +14,8 @@ import { SectionHeading, Reveal } from './ui.jsx';
    Ảnh nhúng trong README GitHub không dùng được ở đây: chúng là URL có chữ ký
    và trả 403 khi gọi từ tên miền khác. Phải tự chép ảnh vào public/screens/. */
 function ProjectMedia({ project, tilt }) {
+  const [imgFailed, setImgFailed] = useState(false);
+
   if (project.screenshot) {
     return (
       <div
@@ -41,12 +43,22 @@ function ProjectMedia({ project, tilt }) {
       rel="noreferrer"
       className="group relative block w-full shrink-0 overflow-hidden rounded-card border border-line bg-surface-2 md:w-[320px] lg:w-[380px]"
     >
-      <img
-        src={`https://opengraph.githubassets.com/1/FLD-TN/${repo}`}
-        alt={`Thẻ kho mã ${project.name} trên GitHub`}
-        loading="lazy"
-        className="aspect-[2/1] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
-      />
+      {imgFailed ? (
+        /* Ảnh thẻ nằm ở máy chủ GitHub. Không tải được thì phải có thứ tử tế
+           thế chỗ, chứ để mặc thì trình duyệt hiện khung vỡ kèm chữ alt. */
+        <div className="flex aspect-[2/1] w-full flex-col items-center justify-center gap-2 bg-surface px-6 text-center">
+          <GithubLogoIcon size={30} weight="fill" className="text-muted" />
+          <p className="font-display text-base font-semibold">{project.name}</p>
+        </div>
+      ) : (
+        <img
+          src={`https://opengraph.githubassets.com/1/FLD-TN/${repo}`}
+          alt={`Thẻ kho mã ${project.name} trên GitHub`}
+          loading="lazy"
+          onError={() => setImgFailed(true)}
+          className="aspect-[2/1] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+        />
+      )}
       <p className="border-t border-line px-4 py-2.5 font-mono text-[11px] text-muted">
         github.com/FLD-TN/{repo}
       </p>
@@ -73,7 +85,7 @@ function ProjectCard({ project, index }) {
         className="grid grid-cols-1 items-center gap-8 overflow-hidden rounded-card border border-line bg-surface px-6 py-10 sm:px-10 md:grid-cols-[1fr_auto] md:gap-12 md:px-14 md:py-14"
       >
         <div>
-          <div className="flex items-center gap-3 font-mono text-[12px] text-muted">
+          <div className="flex flex-wrap items-center gap-3 font-mono text-[12px] text-muted">
             <span className="rounded-full border border-line-strong px-3 py-1">{project.platform}</span>
             <span>{project.year}</span>
           </div>
@@ -95,15 +107,28 @@ function ProjectCard({ project, index }) {
             ))}
           </ul>
 
-          <a
-            href={project.repo}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-8 inline-flex items-center gap-1.5 border-b border-accent/40 pb-0.5 text-[15px] text-accent transition-colors hover:border-accent"
-          >
-            Xem mã nguồn
-            <ArrowUpRightIcon size={16} weight="bold" />
-          </a>
+          <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3">
+            <a
+              href={project.repo}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 border-b border-accent/40 pb-0.5 text-[15px] text-accent transition-colors hover:border-accent"
+            >
+              Xem mã nguồn
+              <ArrowUpRightIcon size={16} weight="bold" />
+            </a>
+            {project.live && (
+              <a
+                href={project.live}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 border-b border-line-strong pb-0.5 text-[15px] text-ink transition-colors hover:border-ink"
+              >
+                Mở trang thật
+                <ArrowSquareOutIcon size={16} weight="bold" />
+              </a>
+            )}
+          </div>
         </div>
 
         <ProjectMedia project={project} tilt={project.accentTilt} />
@@ -113,22 +138,73 @@ function ProjectCard({ project, index }) {
 }
 
 export default function Work() {
+  const reduce = useReducedMotion();
+  const [active, setActive] = useState(0);
+  const group = projectGroups[active];
+
   return (
     <section id="du-an" className="mx-auto w-full max-w-[1240px] px-5 py-24 sm:px-8 md:py-32 lg:px-12">
-      <div className="mb-12 flex flex-wrap items-end justify-between gap-6 md:mb-16">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <SectionHeading className="max-w-[16ch]">Ứng dụng đã làm</SectionHeading>
         <Reveal delay={0.1}>
-          <p className="max-w-[34ch] text-[15px] text-muted">
-            Ba sản phẩm, ba nền tảng. Mỗi cái giải một bài toán hẹp thay vì làm tất cả mọi thứ.
-          </p>
+          <p className="max-w-[34ch] text-[15px] text-muted">{group.blurb}</p>
         </Reveal>
       </div>
 
-      <div className="relative">
-        {projects.map((p, i) => (
+      {/* Nút thật, không phải div bắt sự kiện: bàn phím chuyển tab được ngay.
+          Viên thuốc nền của tab đang chọn dùng layoutId nên nó trượt sang tab
+          mới, thay vì tắt chỗ này rồi bật chỗ kia. */}
+      <Reveal delay={0.15}>
+        <div role="tablist" aria-label="Nhóm dự án" className="mb-10 flex flex-wrap gap-1 md:mb-14">
+          {projectGroups.map((g, i) => {
+            const selected = i === active;
+            return (
+              <button
+                key={g.id}
+                role="tab"
+                type="button"
+                id={`tab-${g.id}`}
+                aria-selected={selected}
+                aria-controls={`panel-${g.id}`}
+                onClick={() => setActive(i)}
+                className={`relative rounded-full px-5 py-2.5 text-[14px] font-medium transition-colors ${
+                  selected ? 'text-bg' : 'text-muted hover:text-ink'
+                }`}
+              >
+                {selected && (
+                  <motion.span
+                    layoutId={reduce ? undefined : 'tab-pill'}
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    className="absolute inset-0 rounded-full bg-accent"
+                  />
+                )}
+                <span className="relative z-10 whitespace-nowrap">{g.label}</span>
+                <span className="relative z-10 ml-2 font-mono text-[11px] opacity-70">
+                  {g.projects.length}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </Reveal>
+
+      {/* key theo nhóm để React dựng lại cây thẻ khi đổi tab. Mỗi thẻ có một
+          useScroll riêng bám vào phần tử của nó; tái dùng cây cũ sẽ để lại giá
+          trị cuộn của thẻ trước, làm thẻ mới hiện ra đã mờ sẵn. */}
+      <motion.div
+        key={group.id}
+        id={`panel-${group.id}`}
+        role="tabpanel"
+        aria-labelledby={`tab-${group.id}`}
+        initial={reduce ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="relative"
+      >
+        {group.projects.map((p, i) => (
           <ProjectCard key={p.id} project={p} index={i} />
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }
