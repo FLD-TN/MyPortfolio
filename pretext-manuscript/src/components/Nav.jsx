@@ -4,10 +4,10 @@ import { ListIcon, XIcon, ArrowRightIcon } from '@phosphor-icons/react';
 import { profile } from '../data.js';
 
 const LINKS = [
-  { href: '#du-an', label: 'Ứng dụng' },
-  { href: '#san-choi', label: 'Sân chơi' },
-  { href: '#cach-lam', label: 'Cách làm' },
-  { href: '#lien-he', label: 'Liên hệ' },
+  { href: '#du-an', label: 'Home' },
+  { href: '#san-choi', label: 'Projects' },
+  { href: '#cach-lam', label: 'Game' },
+  { href: '#lien-he', label: 'Contact' },
 ];
 
 const EASE = [0.16, 1, 0.3, 1];

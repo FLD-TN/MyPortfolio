@@ -6,7 +6,7 @@ import { useReducedMotion } from 'motion/react';
    khỏi con trỏ, và một ống kính đi theo con trỏ lộ ra dòng chữ nằm dưới. */
 const TEXT =
   'Rê con trỏ qua đoạn này đi. Từng ký tự ở đây là một điểm toạ độ được vẽ tay lên canvas chứ không phải thẻ văn bản của trình duyệt, nên chúng biết né tay bạn ra. Lực đẩy tỉ lệ nghịch với khoảng cách, và mỗi ký tự tự tìm đường về chỗ cũ theo một hàm nội suy chậm. Ống kính đi theo con trỏ còn lộ ra một dòng khác nằm sẵn dưới lớp chữ này.';
-const HIDDEN = 'Thật tốt vì bạn ở đây, chúc may mắn nhé !';
+const HIDDEN = 'Chưa tày đâu!';
 
 export default function ManuscriptToy() {
   const reduce = useReducedMotion();

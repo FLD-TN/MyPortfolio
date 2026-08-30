@@ -234,7 +234,7 @@ export default function Hero() {
             transition={{ duration: 0.7, delay: 0.68, ease: EASE }}
           >
             <Button href="#du-an">
-              Xem ứng dụng
+              Các dự án
               <ArrowDownRightIcon size={18} weight="bold" />
             </Button>
             <Button href="#lien-he" variant="ghost">
