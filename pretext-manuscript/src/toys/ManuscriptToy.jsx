@@ -4,8 +4,7 @@ import { useReducedMotion } from 'motion/react';
 
 /* Món đồ chơi này là phần còn lại của bản dựng đầu tiên của trang. Chữ dạt ra
    khỏi con trỏ, và một ống kính đi theo con trỏ lộ ra dòng chữ nằm dưới. */
-const TEXT =
-  'Rê con trỏ qua đoạn này đi. Từng ký tự ở đây là một điểm toạ độ được vẽ tay lên canvas chứ không phải thẻ văn bản của trình duyệt, nên chúng biết né tay bạn ra. Lực đẩy tỉ lệ nghịch với khoảng cách, và mỗi ký tự tự tìm đường về chỗ cũ theo một hàm nội suy chậm. Ống kính đi theo con trỏ còn lộ ra một dòng khác nằm sẵn dưới lớp chữ này.';
+const TEXT = '"Có một cảnh tượng vĩ đại hơn biển cả, đó là bầu trời; có một cảnh tượng vĩ đại hơn bầu trời, đó là bề trong tâm hồn con người. Viết nên bài thơ về lương tâm con người, dù chỉ là của một con người duy nhất, dù chỉ là của một kẻ ti tiện nhất, cũng là dung hợp mọi anh hùng ca vào một bản anh hùng ca tối cao và tuyệt đích."';
 const HIDDEN = 'Chưa tày đâu!';
 
 export default function ManuscriptToy() {

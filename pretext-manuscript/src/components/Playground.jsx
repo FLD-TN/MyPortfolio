@@ -19,7 +19,7 @@ export default function Playground() {
             giờ tự đẩy chiều cao của chính khung. */}
         <Reveal className="flex flex-col overflow-hidden rounded-card border border-line bg-surface">
           <div className="flex items-center justify-between gap-4 border-b border-line px-6 py-4">
-            <h3 className="font-display text-lg font-semibold tracking-[-0.02em]">Chữ né tay bạn</h3>
+            <h3 className="font-display text-lg font-semibold tracking-[-0.02em]">Rơ chuột vào</h3>
             <span className="font-mono text-[11px] text-muted">Canvas 2D</span>
           </div>
           <div className="relative min-h-[420px] flex-1">
