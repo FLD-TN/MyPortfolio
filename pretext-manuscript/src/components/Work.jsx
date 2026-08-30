@@ -1,51 +1,215 @@
-import { useRef, useState } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react';
-import { ArrowUpRightIcon, ArrowSquareOutIcon, GithubLogoIcon } from '@phosphor-icons/react';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'motion/react';
+import { ArrowUpRightIcon, ArrowSquareOutIcon, GithubLogoIcon, PlusIcon } from '@phosphor-icons/react';
 import { projectGroups } from '../data.js';
 import { SectionHeading, Reveal } from './ui.jsx';
 
-/* Hai kiểu hình tuỳ theo có ảnh chụp thật hay không.
+/* Mục lục dự án.
 
-   Có ảnh chụp màn hình (dọc) thì dựng khung điện thoại, đúng chất một sản phẩm
-   di động. Chưa có thì dùng thẻ OpenGraph của chính repo, nhưng thẻ đó là ảnh
-   NGANG tỉ lệ 2:1, nhét vào khung máy dọc sẽ teo lại giữa một mảng đen. Nên
-   trường hợp này bỏ khung máy, trình bày như một tấm thẻ ngang cho đúng khổ.
+   Tên dự án là những hàng chữ lớn xếp chồng, ngăn nhau bằng một nét mảnh. Rê
+   chuột lên hàng nào thì ảnh xem trước của dự án đó bay theo con trỏ, và các
+   hàng còn lại mờ đi. Bấm thì hàng tự mở ra ngay tại chỗ.
 
-   Ảnh nhúng trong README GitHub không dùng được ở đây: chúng là URL có chữ ký
-   và trả 403 khi gọi từ tên miền khác. Phải tự chép ảnh vào public/screens/. */
-function ProjectMedia({ project, tilt }) {
-  const [imgFailed, setImgFailed] = useState(false);
+   Vì sao mở tại chỗ chứ không bật hộp thoại: toàn bộ chữ mô tả luôn nằm trong
+   HTML, nên bộ máy tìm kiếm đọc được và người dùng bấm Ctrl+F vẫn tìm ra. Hộp
+   thoại thì chữ chỉ xuất hiện sau khi bấm.
 
-  if (project.screenshot) {
-    return (
-      <div
-        className="relative mx-auto aspect-[9/19] w-[190px] shrink-0 rounded-[34px] border border-line-strong bg-surface-2 p-[7px] shadow-[0_30px_70px_-20px_rgba(0,0,0,0.9)] sm:w-[215px] lg:w-[240px]"
-        style={{ transform: `rotate(${tilt}deg)` }}
+   Ảnh bay theo con trỏ chỉ bật khi thiết bị thật sự có con trỏ. Trên cảm ứng
+   không có trạng thái rê chuột, hiện nó ra chỉ tổ vướng. */
+
+function useHasPointer() {
+  const [has, setHas] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const sync = () => setHas(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+  return has;
+}
+
+/* Tấm ảnh bám theo con trỏ. Toạ độ chạy trên motion value, không qua state của
+   React, nên di chuột không làm render lại cây component. */
+function CursorPreview({ project, active, isOpen }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 260, damping: 28, mass: 0.6 });
+  const sy = useSpring(y, { stiffness: 260, damping: 28, mass: 0.6 });
+  const placed = useRef(false);
+  // Nghiêng theo tốc độ đưa ngang, cho tấm ảnh có quán tính chứ không cứng đờ
+  const tilt = useTransform(sx, (v) => {
+    const d = v - x.get();
+    return Math.max(-14, Math.min(14, d * 0.12));
+  });
+
+  useEffect(() => {
+    const move = (e) => {
+      const nx = e.clientX + 28;
+      const ny = e.clientY - 110;
+      x.set(nx);
+      y.set(ny);
+      /* Lần đầu thì đặt thẳng, không cho lò xo chạy. Thiếu bước này tấm ảnh sẽ
+         bay từ góc trên bên trái màn hình vào, trông như lỗi. */
+      if (!placed.current) {
+        placed.current = true;
+        sx.jump(nx);
+        sy.jump(ny);
+      }
+    };
+    window.addEventListener('pointermove', move);
+    return () => window.removeEventListener('pointermove', move);
+  }, [x, y, sx, sy]);
+
+  const repo = project?.repo.split('/').pop();
+
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ x: sx, y: sy, rotate: tilt }}
+      animate={{ opacity: active ? 1 : 0, scale: active ? 1 : 0.9 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+      className="pointer-events-none fixed top-0 left-0 z-40 hidden w-[320px] overflow-hidden rounded-card border border-line-strong bg-surface-2 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.95)] lg:block"
+    >
+      {repo && (
+        <img
+          src={`https://opengraph.githubassets.com/1/FLD-TN/${repo}`}
+          alt=""
+          className="aspect-[2/1] w-full object-cover"
+        />
+      )}
+      {/* Nói thẳng ra việc cần làm. Người dùng không phải đoán hàng chữ này có
+          bấm được hay không. */}
+      <p className="flex items-center gap-1.5 bg-accent px-4 py-2 font-mono text-[11px] font-medium text-bg">
+        {isOpen ? 'Bấm để đóng lại' : 'Bấm để xem chi tiết'}
+        <ArrowUpRightIcon size={12} weight="bold" />
+      </p>
+    </motion.div>
+  );
+}
+
+function ProjectRow({ project, open, onToggle, onHover, dimmed, reduce }) {
+  return (
+    <div
+      className="border-t border-line"
+      onMouseEnter={() => onHover(project.id)}
+      onMouseLeave={() => onHover(null)}
+    >
+      <button
+        type="button"
+        onClick={() => onToggle(project.id)}
+        aria-expanded={open}
+        aria-controls={`row-${project.id}`}
+        className={`group flex w-full cursor-pointer items-center justify-between gap-6 py-7 text-left transition-opacity duration-300 md:py-9 ${
+          dimmed ? 'opacity-35' : 'opacity-100'
+        }`}
       >
-        <div className="absolute top-[7px] left-1/2 z-10 h-[18px] w-[74px] -translate-x-1/2 rounded-b-[11px] bg-surface-2" />
-        <div className="relative h-full w-full overflow-hidden rounded-[27px] bg-bg">
-          <img
-            src={project.screenshot}
-            alt={`Ảnh chụp màn hình ${project.name}`}
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
+        <span className="flex min-w-0 items-baseline gap-4 md:gap-7">
+          <motion.span
+            animate={reduce ? undefined : { x: open ? 14 : 0 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+            className={`font-display truncate text-[clamp(1.75rem,5.2vw,3.6rem)] leading-[1.05] font-semibold tracking-[-0.035em] transition-colors duration-300 ${
+              open ? 'text-accent' : 'group-hover:text-accent'
+            }`}
+          >
+            {project.name}
+            {/* Gạch chân chạy từ trái sang khi rê vào, thêm một dấu hiệu nữa cho
+                người dùng chuột lẫn người dùng bàn phím khi hàng được focus. */}
+            <span
+              className={`mt-1 block h-[2px] origin-left bg-accent transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                open ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100 group-focus-visible:scale-x-100'
+              }`}
+            />
+          </motion.span>
+        </span>
+
+        <span className="flex shrink-0 items-center gap-4 md:gap-8">
+          <span className="hidden font-mono text-[12px] text-muted sm:block">{project.platform}</span>
+          <span className="font-mono text-[12px] text-muted">{project.year}</span>
+          <motion.span
+            animate={reduce ? undefined : { rotate: open ? 135 : 0 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+            className={`flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors ${
+              open ? 'border-accent text-accent' : 'border-line-strong text-muted group-hover:border-accent group-hover:text-accent'
+            }`}
+          >
+            <PlusIcon size={16} weight="bold" />
+          </motion.span>
+        </span>
+      </button>
+
+      {/* Mở ra bằng lưới 0fr sang 1fr: trình duyệt tự nội suy chiều cao, không
+          phải đo bằng JavaScript rồi gán pixel. Con bên trong bắt buộc phải có
+          overflow hidden và min-height 0, thiếu là nó không chịu co lại. */}
+      <div
+        id={`row-${project.id}`}
+        className="grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{
+          gridTemplateRows: open ? '1fr' : '0fr',
+          // Giảm chuyển động thì mở ra tức thì, không bắt chờ nửa giây
+          transitionDuration: reduce ? '0ms' : undefined,
+        }}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="grid grid-cols-1 gap-8 pb-10 md:grid-cols-[1fr_340px] md:gap-12">
+            <div>
+              <p className="text-lg text-ink/90">{project.tagline}</p>
+              <p className="mt-4 max-w-[54ch] text-[15px] leading-relaxed text-muted">{project.body}</p>
+
+              <ul className="mt-6 flex flex-wrap gap-2">
+                {project.tags.map((t) => (
+                  <li
+                    key={t}
+                    className="rounded-full bg-surface-2 px-3.5 py-1.5 font-mono text-[11.5px] text-muted"
+                  >
+                    {t}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3">
+                <a
+                  href={project.repo}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 border-b border-accent/40 pb-0.5 text-[15px] text-accent transition-colors hover:border-accent"
+                >
+                  Xem mã nguồn
+                  <ArrowUpRightIcon size={16} weight="bold" />
+                </a>
+                {project.live && (
+                  <a
+                    href={project.live}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 border-b border-line-strong pb-0.5 text-[15px] text-ink transition-colors hover:border-ink"
+                  >
+                    Mở trang thật
+                    <ArrowSquareOutIcon size={16} weight="bold" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <RepoCard project={project} />
+          </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
+function RepoCard({ project }) {
+  const [failed, setFailed] = useState(false);
   const repo = project.repo.split('/').pop();
   return (
     <a
       href={project.repo}
       target="_blank"
       rel="noreferrer"
-      className="group relative block w-full shrink-0 overflow-hidden rounded-card border border-line bg-surface-2 md:w-[320px] lg:w-[380px]"
+      className="group block h-fit overflow-hidden rounded-card border border-line bg-surface-2"
     >
-      {imgFailed ? (
-        /* Ảnh thẻ nằm ở máy chủ GitHub. Không tải được thì phải có thứ tử tế
-           thế chỗ, chứ để mặc thì trình duyệt hiện khung vỡ kèm chữ alt. */
+      {failed ? (
         <div className="flex aspect-[2/1] w-full flex-col items-center justify-center gap-2 bg-surface px-6 text-center">
           <GithubLogoIcon size={30} weight="fill" className="text-muted" />
           <p className="font-display text-base font-semibold">{project.name}</p>
@@ -55,7 +219,7 @@ function ProjectMedia({ project, tilt }) {
           src={`https://opengraph.githubassets.com/1/FLD-TN/${repo}`}
           alt={`Thẻ kho mã ${project.name} trên GitHub`}
           loading="lazy"
-          onError={() => setImgFailed(true)}
+          onError={() => setFailed(true)}
           className="aspect-[2/1] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
         />
       )}
@@ -66,81 +230,22 @@ function ProjectMedia({ project, tilt }) {
   );
 }
 
-function ProjectCard({ project, index }) {
-  const reduce = useReducedMotion();
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start 84px', 'end 200px'],
-  });
-
-  // Thẻ phía dưới thu nhỏ và mờ đi khi thẻ kế tiếp trượt lên đè lên nó
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.28]);
-
-  return (
-    <div ref={ref} className="sticky top-[84px] pb-6" style={{ paddingTop: `${index * 14}px` }}>
-      <motion.article
-        style={reduce ? undefined : { scale, opacity }}
-        className="grid grid-cols-1 items-center gap-8 overflow-hidden rounded-card border border-line bg-surface px-6 py-10 sm:px-10 md:grid-cols-[1fr_auto] md:gap-12 md:px-14 md:py-14"
-      >
-        <div>
-          <div className="flex flex-wrap items-center gap-3 font-mono text-[12px] text-muted">
-            <span className="rounded-full border border-line-strong px-3 py-1">{project.platform}</span>
-            <span>{project.year}</span>
-          </div>
-
-          <h3 className="font-display mt-6 text-[clamp(2rem,5vw,3.4rem)] leading-[1.02] font-semibold tracking-[-0.03em]">
-            {project.name}
-          </h3>
-          <p className="mt-3 text-lg text-ink/90">{project.tagline}</p>
-          <p className="mt-4 max-w-[52ch] text-[15px] leading-relaxed text-muted">{project.body}</p>
-
-          <ul className="mt-7 flex flex-wrap gap-2">
-            {project.tags.map((t) => (
-              <li
-                key={t}
-                className="rounded-full bg-surface-2 px-3.5 py-1.5 font-mono text-[11.5px] text-muted"
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3">
-            <a
-              href={project.repo}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 border-b border-accent/40 pb-0.5 text-[15px] text-accent transition-colors hover:border-accent"
-            >
-              Xem mã nguồn
-              <ArrowUpRightIcon size={16} weight="bold" />
-            </a>
-            {project.live && (
-              <a
-                href={project.live}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 border-b border-line-strong pb-0.5 text-[15px] text-ink transition-colors hover:border-ink"
-              >
-                Mở trang thật
-                <ArrowSquareOutIcon size={16} weight="bold" />
-              </a>
-            )}
-          </div>
-        </div>
-
-        <ProjectMedia project={project} tilt={project.accentTilt} />
-      </motion.article>
-    </div>
-  );
-}
-
 export default function Work() {
   const reduce = useReducedMotion();
-  const [active, setActive] = useState(0);
-  const group = projectGroups[active];
+  const hasPointer = useHasPointer();
+  const [tab, setTab] = useState(0);
+  const [openId, setOpenId] = useState(null);
+  const [hoverId, setHoverId] = useState(null);
+
+  const group = projectGroups[tab];
+  const hovered = group.projects.find((p) => p.id === hoverId) ?? null;
+  const showPreview = hasPointer && !reduce && Boolean(hovered);
+
+  const switchTab = (i) => {
+    setTab(i);
+    setOpenId(null);
+    setHoverId(null);
+  };
 
   return (
     <section id="du-an" className="mx-auto w-full max-w-[1240px] px-5 py-24 sm:px-8 md:py-32 lg:px-12">
@@ -151,13 +256,10 @@ export default function Work() {
         </Reveal>
       </div>
 
-      {/* Nút thật, không phải div bắt sự kiện: bàn phím chuyển tab được ngay.
-          Viên thuốc nền của tab đang chọn dùng layoutId nên nó trượt sang tab
-          mới, thay vì tắt chỗ này rồi bật chỗ kia. */}
       <Reveal delay={0.15}>
-        <div role="tablist" aria-label="Nhóm dự án" className="mb-10 flex flex-wrap gap-1 md:mb-14">
+        <div role="tablist" aria-label="Nhóm dự án" className="mb-4 flex flex-wrap gap-1 md:mb-6">
           {projectGroups.map((g, i) => {
-            const selected = i === active;
+            const selected = i === tab;
             return (
               <button
                 key={g.id}
@@ -166,7 +268,7 @@ export default function Work() {
                 id={`tab-${g.id}`}
                 aria-selected={selected}
                 aria-controls={`panel-${g.id}`}
-                onClick={() => setActive(i)}
+                onClick={() => switchTab(i)}
                 className={`relative rounded-full px-5 py-2.5 text-[14px] font-medium transition-colors ${
                   selected ? 'text-bg' : 'text-muted hover:text-ink'
                 }`}
@@ -188,23 +290,27 @@ export default function Work() {
         </div>
       </Reveal>
 
-      {/* key theo nhóm để React dựng lại cây thẻ khi đổi tab. Mỗi thẻ có một
-          useScroll riêng bám vào phần tử của nó; tái dùng cây cũ sẽ để lại giá
-          trị cuộn của thẻ trước, làm thẻ mới hiện ra đã mờ sẵn. */}
-      <motion.div
-        key={group.id}
+      <div
         id={`panel-${group.id}`}
         role="tabpanel"
         aria-labelledby={`tab-${group.id}`}
-        initial={reduce ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="relative"
+        className="border-b border-line"
+        onMouseLeave={() => setHoverId(null)}
       >
-        {group.projects.map((p, i) => (
-          <ProjectCard key={p.id} project={p} index={i} />
+        {group.projects.map((p) => (
+          <ProjectRow
+            key={p.id}
+            project={p}
+            open={openId === p.id}
+            onToggle={(id) => setOpenId((cur) => (cur === id ? null : id))}
+            onHover={setHoverId}
+            dimmed={Boolean(hoverId) && hoverId !== p.id}
+            reduce={reduce}
+          />
         ))}
-      </motion.div>
+      </div>
+
+      <CursorPreview project={hovered} active={showPreview} isOpen={Boolean(hovered) && hovered.id === openId} />
     </section>
   );
 }

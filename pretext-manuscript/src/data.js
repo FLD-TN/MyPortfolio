@@ -51,6 +51,7 @@ export const projectGroups = [
     projects: [
       {
         id: 'flood-aid',
+        icon: 'lifebuoy',
         name: 'FloodAid',
         platform: 'Flutter · Node.js · React',
         year: '2026',
@@ -64,6 +65,7 @@ export const projectGroups = [
       },
       {
         id: 'quan-li-truyen',
+        icon: 'books',
         name: 'Quản Lí Truyện',
         platform: 'Android · Java',
         year: '2025',
@@ -77,6 +79,7 @@ export const projectGroups = [
       },
       {
         id: 'online-food-shop',
+        icon: 'food',
         name: 'OnlineFoodShop',
         platform: 'Android · Java · Firebase',
         year: '2025',
@@ -97,6 +100,7 @@ export const projectGroups = [
     projects: [
       {
         id: 'gopy-discord',
+        icon: 'chat',
         name: 'GopYDiscord',
         platform: 'Minecraft · Spigot/Paper 1.21+',
         year: '2026',
@@ -110,6 +114,7 @@ export const projectGroups = [
       },
       {
         id: 'disable-command',
+        icon: 'prohibit',
         name: 'DisableCommand',
         platform: 'Minecraft · Plugin',
         year: '2025',
@@ -123,6 +128,7 @@ export const projectGroups = [
       },
       {
         id: 'li-xi-game',
+        icon: 'gift',
         name: 'Lì Xì Game',
         platform: 'React · TypeScript · Vite',
         year: '2026',
