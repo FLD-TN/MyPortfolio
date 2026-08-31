@@ -5,6 +5,7 @@ import Work from './components/Work.jsx';
 import Playground from './components/Playground.jsx';
 import Craft from './components/Craft.jsx';
 import Contact from './components/Contact.jsx';
+import HelloWave from './components/HelloWave.jsx';
 import { profile } from './data.js';
 
 export default function App() {
@@ -27,6 +28,8 @@ export default function App() {
         <Craft />
         <Contact />
       </main>
+
+      <HelloWave />
 
       <footer className="border-t border-line">
         <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-center justify-between gap-4 px-5 py-9 sm:px-8 lg:px-12">
