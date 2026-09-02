@@ -4,7 +4,8 @@ import { ListIcon, XIcon, ArrowRightIcon } from '@phosphor-icons/react';
 import { profile } from '../data.js';
 
 const LINKS = [
-  { href: '#du-an', label: 'Home' },
+  { href: '#top', label: 'Home' },
+  { href: '#du-an', label: 'Projects' },
   { href: '#lien-he', label: 'Contact' },
 ];
 

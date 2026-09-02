@@ -3,7 +3,6 @@ import Hero from './components/Hero.jsx';
 import StackMarquee from './components/StackMarquee.jsx';
 import Work from './components/Work.jsx';
 import Contact from './components/Contact.jsx';
-import HelloWave from './components/HelloWave.jsx';
 import { profile } from './data.js';
 
 export default function App() {
@@ -25,14 +24,11 @@ export default function App() {
         <Contact />
       </main>
 
-      <HelloWave />
-
       <footer className="border-t border-line">
         <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-center justify-between gap-4 px-5 py-9 sm:px-8 lg:px-12">
           <p className="font-mono text-[12px] text-muted">
             {profile.name}, {new Date().getFullYear()}
           </p>
-          <p className="font-mono text-[12px] text-muted">Dựng bằng React, Three.js và Motion</p>
         </div>
       </footer>
     </>
