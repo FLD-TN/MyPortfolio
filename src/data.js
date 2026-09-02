@@ -93,7 +93,7 @@ export const projectGroups = [
         name: 'FloodAid',
         platform: 'Flutter · Node.js · React',
         year: '2026',
-        tagline: 'Điều phối cứu trợ lũ lụt theo thời gian thực',
+        tagline: 'Nghiên cứu và xây dựng Nền tảng Hỗ trợ Điều phối Cứu trợ Lũ lụt tại Miền Trung dựa trên AI NLP',
         body: 'Khoá luận tốt nghiệp HUFLIT. Người gặp nạn gửi tín hiệu bằng giọng nói, hệ thống chấm mức khẩn cấp rồi tìm tình nguyện viên gần nhất. Chuẩn hoá phương ngữ Miền Trung chạy ngay trên máy nên mất mạng vẫn hiểu được lời kêu cứu.',
         tags: ['Flutter', 'PostGIS', 'WebSocket', 'Gemini', 'eKYC'],
         repo: 'https://github.com/FLD-TN/Flood-aid',
