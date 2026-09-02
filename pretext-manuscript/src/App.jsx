@@ -2,8 +2,6 @@ import Nav from './components/Nav.jsx';
 import Hero from './components/Hero.jsx';
 import StackMarquee from './components/StackMarquee.jsx';
 import Work from './components/Work.jsx';
-import Playground from './components/Playground.jsx';
-import Craft from './components/Craft.jsx';
 import Contact from './components/Contact.jsx';
 import HelloWave from './components/HelloWave.jsx';
 import { profile } from './data.js';
@@ -24,8 +22,6 @@ export default function App() {
         <Hero />
         <StackMarquee />
         <Work />
-        <Playground />
-        <Craft />
         <Contact />
       </main>
 

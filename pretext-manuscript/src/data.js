@@ -5,10 +5,47 @@
    README, cây thư mục, tệp khai báo phụ thuộc. Không có con số nào bịa ra, và
    file cố tình không chứa lượt tải hay đánh giá sao.
 
-   ẢNH: screenshot để trống thì khung máy hiện thẻ OpenGraph của repo. Muốn đẹp
-   hơn thì chụp màn hình ứng dụng, bỏ vào  public/screens/  rồi điền đường dẫn
-   dạng '/screens/ten-tep.png'. Ảnh trong README GitHub KHÔNG nhúng được: chúng
-   là URL có chữ ký, gọi từ tên miền khác sẽ bị trả 403.
+   ẢNH DEMO. Mỗi dự án hiện trong một khung dựng bằng CSS, chọn bằng trường
+   frame:
+     'phone'   khung điện thoại dọc, tỉ lệ 9:19.5  -> dùng cho ứng dụng di động
+     'browser' khung trình duyệt ngang, tỉ lệ 16:10 -> dùng cho web và plugin
+
+   Ảnh thật khai trong mảng screens. Chụp thẳng từ máy hoặc máy ảo rồi bỏ vào
+   public/screens/ :
+
+     screens: [
+       { src: '/screens/floodaid-1.png', label: 'Gửi tín hiệu bằng giọng nói' },
+       { src: '/screens/floodaid-2.png', label: 'Bản đồ tình nguyện viên gần nhất' },
+     ],
+
+     - Khung điện thoại: ảnh dọc, tốt nhất 1170x2532 (cỡ ảnh chụp iPhone).
+     - Khung trình duyệt: ảnh ngang, tốt nhất 1600x1000.
+   Ảnh được cắt theo kiểu bám mép trên, nên lệch tỉ lệ một chút vẫn không sao.
+
+   height là chiều cao khung riêng của dự án, tính bằng pixel. Bỏ trống thì dùng
+   mức chung CAO trong Work.jsx. Đặt thấp hơn thì ảnh cũng hẹp lại theo đúng tỉ
+   lệ — chiều cao và bề ngang không tách rời nhau được, trừ khi chịu cắt mất đáy
+   ảnh, mà đáy là chỗ đặt nút chính.
+
+   ratio là tỉ lệ khung máy của riêng dự án đó, ghi theo dạng 'rộng / cao' lấy
+   đúng kích thước ảnh CAO nhất trong bộ. Máy mỗi hãng một khác, ép chung một
+   khung là dự án nào đó bị cắt mất đáy màn hình — mà đáy màn hình thường là chỗ
+   đặt nút chính. Bỏ trống thì dùng tỉ lệ mặc định trong Work.jsx.
+
+   Ảnh đã ghép sẵn khung điện thoại thì khai thêm  fit: 'contain'  và  bg  bằng
+   đúng màu nền của ảnh. Mặc định trang cắt ảnh cho phủ kín khung, gặp ảnh có
+   khung vẽ sẵn là xén mất vành máy.
+
+   label KHÔNG hiện ra trang. Nó dùng làm chữ thay thế cho ảnh: trình đọc màn
+   hình đọc nó cho người khiếm thị, và bộ máy tìm kiếm đọc nó để hiểu ảnh. Bỏ
+   trống thì rơi về một câu chung chung.
+
+   TỪ HAI ẢNH TRỞ LÊN thì khung điện thoại tự xếp chồng thành cỗ bài và hiện nút
+   mũi tên để chuyển. Một ảnh thì hiện thẳng, không có nút.
+
+   Mảng rỗng thì khung điện thoại hiện màn hình khởi động vẽ bằng CSS, còn khung
+   trình duyệt mượn thẻ OpenGraph của kho mã. Ảnh trong README GitHub KHÔNG nhúng
+   được: chúng là URL có chữ ký, gọi từ tên miền khác sẽ bị trả 403.
    ========================================================================= */
 
 export const profile = {
@@ -50,6 +87,8 @@ export const projectGroups = [
     projects: [
       {
         id: 'flood-aid',
+        frame: 'phone',
+        ratio: '380 / 822',
         icon: 'lifebuoy',
         name: 'FloodAid',
         platform: 'Flutter · Node.js · React',
@@ -59,11 +98,37 @@ export const projectGroups = [
         tags: ['Flutter', 'PostGIS', 'WebSocket', 'Gemini', 'eKYC'],
         repo: 'https://github.com/FLD-TN/Flood-aid',
         live: '',
-        screenshot: '',
+        screens: [
+          {
+            src: '/screens/floodaid-1.png',
+            label: 'Gửi yêu cầu cứu trợ kèm toạ độ, ghi chú nhanh và mô tả bằng giọng nói',
+          },
+          {
+            src: '/screens/floodaid-2.png',
+            label: 'Theo dõi ca SOS trực tiếp trong lúc hệ thống quét đội cứu hộ gần nhất',
+          },
+          {
+            src: '/screens/floodaid-3.png',
+            label: 'Phía cứu hộ: đường tới nạn nhân, khoảng cách và thời gian dự kiến',
+          },
+          {
+            src: '/screens/floodaid-4.png',
+            label: 'Nhắn tin thời gian thực giữa người gặp nạn và tình nguyện viên',
+          },
+        ],
         accentTilt: -6,
       },
       {
         id: 'quan-li-truyen',
+        frame: 'phone',
+        /* Hai ảnh này đã ghép sẵn khung điện thoại nên dùng nguyên bản, không
+           cắt. fit contain cho ảnh vừa khít khung, bg lấy đúng màu nền của ảnh
+           để chỗ thừa không lộ ra thành viền. ratio lấy theo ảnh RỘNG nhất, khi
+           đó ảnh còn lại chỉ hụt hai bên vài pixel mà nền đã cùng màu. */
+        ratio: '428 / 830',
+        fit: 'contain',
+        bg: '#2b2d30',
+        height: 500,
         icon: 'books',
         name: 'Quản Lí Truyện',
         platform: 'Android · Java',
@@ -73,11 +138,16 @@ export const projectGroups = [
         tags: ['Java', 'SQLite', 'Glide', 'ViewPager2'],
         repo: 'https://github.com/FLD-TN/QuanLiTruyen',
         live: '',
-        screenshot: '',
+        screens: [
+          { src: '/screens/5.png', label: 'Thư viện truyện trong máy, kèm lịch sử đọc và thống kê' },
+          { src: '/screens/6.png', label: 'Đọc cuộn dọc kiểu webtoon, nhớ đúng trang đang dở' },
+        ],
         accentTilt: 5,
       },
       {
         id: 'online-food-shop',
+        frame: 'phone',
+        ratio: '1344 / 2992',
         icon: 'food',
         name: 'OnlineFoodShop',
         platform: 'Android · Java · Firebase',
@@ -87,7 +157,10 @@ export const projectGroups = [
         tags: ['Java', 'Firebase', 'Retrofit', 'Google Sign-In'],
         repo: 'https://github.com/FLD-TN/OnlineFoodShop',
         live: '',
-        screenshot: '',
+        screens: [
+          { src: '/screens/7.png', label: 'Trang chủ: tìm món, duyệt theo danh mục, thêm thẳng vào giỏ' },
+          { src: '/screens/8.png', label: 'Giỏ hàng: sửa số lượng từng món, cộng tổng rồi thanh toán' },
+        ],
         accentTilt: -4,
       },
     ],
@@ -95,10 +168,10 @@ export const projectGroups = [
   {
     id: 'khac',
     label: 'Các dự án khác',
-    blurb: 'Việc làm ngoài giờ. Hai plugin máy chủ Minecraft và một trang web chơi Tết.',
     projects: [
       {
         id: 'gopy-discord',
+        frame: 'browser',
         icon: 'chat',
         name: 'GopYDiscord',
         platform: 'Minecraft · Spigot/Paper 1.21+',
@@ -108,11 +181,12 @@ export const projectGroups = [
         tags: ['Java', 'Spigot API', 'Discord Bot'],
         repo: 'https://github.com/FLD-TN/GopYDiscord',
         live: '',
-        screenshot: '',
+        screens: [],
         accentTilt: 4,
       },
       {
         id: 'disable-command',
+        frame: 'browser',
         icon: 'prohibit',
         name: 'DisableCommand',
         platform: 'Minecraft · Plugin',
@@ -122,11 +196,12 @@ export const projectGroups = [
         tags: ['Java', 'Bukkit config', 'Permission', 'Tab completion'],
         repo: 'https://github.com/FLD-TN/DisableCommand',
         live: '',
-        screenshot: '',
+        screens: [],
         accentTilt: -5,
       },
       {
         id: 'li-xi-game',
+        frame: 'browser',
         icon: 'gift',
         name: 'Lì Xì Game',
         platform: 'React · TypeScript · Vite',
@@ -136,34 +211,10 @@ export const projectGroups = [
         tags: ['React', 'TypeScript', 'Framer Motion', 'canvas-confetti'],
         repo: 'https://github.com/FLD-TN/L-X-Game-main',
         live: 'https://lixigame.vercel.app/',
-        screenshot: '',
+        screens: [],
         accentTilt: 6,
       },
     ],
   },
 ];
 
-/* TODO: đây là cách làm tôi phỏng đoán lúc dựng giao diện, chưa đối chiếu với
-   cách bạn thật sự làm việc. Sửa lại cho đúng, hoặc bỏ bớt mục nào không phải. */
-export const craft = [
-  {
-    icon: 'hand',
-    title: 'Thiết kế cho ngón cái',
-    body: 'Thao tác chính nằm ở nửa dưới màn hình. Không bắt người dùng đổi tay để bấm nút quan trọng.',
-  },
-  {
-    icon: 'gauge',
-    title: 'Giữ nhịp mượt',
-    body: 'Đo bằng công cụ của hệ điều hành chứ không đoán. Mọi hoạt ảnh chạy trên transform và opacity.',
-  },
-  {
-    icon: 'wifi',
-    title: 'Mất mạng vẫn dùng được',
-    body: 'Đọc từ dữ liệu dưới máy trước, đồng bộ sau. Người dùng không nhìn thấy vòng xoay chờ.',
-  },
-  {
-    icon: 'battery',
-    title: 'Không ăn pin',
-    body: 'Gom tác vụ nền, hạn chế đánh thức máy, tắt cảm biến ngay khi màn hình rời khỏi tầm nhìn.',
-  },
-];

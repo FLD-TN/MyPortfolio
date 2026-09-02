@@ -5,8 +5,6 @@ import { profile } from '../data.js';
 
 const LINKS = [
   { href: '#du-an', label: 'Home' },
-  { href: '#san-choi', label: 'Projects' },
-  { href: '#cach-lam', label: 'Game' },
   { href: '#lien-he', label: 'Contact' },
 ];
 
