@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, Suspense, lazy } from 'react';
 import { motion, useScroll, useReducedMotion } from 'motion/react';
 import {
-  ArrowDownRightIcon,
+  ArrowRightIcon,
   EnvelopeSimpleIcon,
   HandGrabbingIcon,
   PlayIcon,
@@ -233,9 +233,11 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.68, ease: EASE }}
           >
-            <Button href="#du-an">
-              Các dự án
-              <ArrowDownRightIcon size={18} weight="bold" />
+            {/* Mở tab mới: đọc CV xong đóng tab là portfolio vẫn còn nguyên
+                phía sau. Cùng tab thì phần lớn người ta không bấm quay lại. */}
+            <Button href={profile.cv} target="_blank" rel="noreferrer">
+              My Resume
+              <ArrowRightIcon size={18} weight="bold" />
             </Button>
             <Button href="#lien-he" variant="ghost">
               <EnvelopeSimpleIcon size={18} weight="bold" />

@@ -55,9 +55,16 @@ export const profile = {
   blurb:
     'I am a software developer with a special bias towards creativity and innovation. Currently in my third year at Ho Chi Minh City University of Foreign Languages - Information Technology (HUFLIT), I am deeply passionate about building impactful solutions.',
   email: 'duyhsne@gmail.com',
+  /* Tệp CV nằm trong public/ nên chạy trên chính tên miền này, không phụ thuộc
+     quyền chia sẻ của Google Drive.
+
+     Tên tệp không dấu, không khoảng trắng: nó chính là URL, mà tên có dấu sẽ
+     thành /CV%20-%20Tr%E1%BA%A7n%20... vừa xấu vừa dễ hỏng khi qua proxy hay
+     lúc ai đó chép link gửi cho nhau. Vẫn giữ đủ tên người vì đây cũng là tên
+     tệp lúc tải về. */
+  cv: '/CV-Tran-Anh-Duy-Mobile-Developer.pdf',
   github: 'https://github.com/FLD-TN',
-  // TODO: link thật, để '#' thì nút vẫn hiện nhưng bấm không đi đâu
-  linkedin: '#',
+  linkedin: 'https://www.linkedin.com/in/tran-anh-duy-bb8254333',
 };
 
 /* Chỉ liệt kê thứ thật sự xuất hiện trong ba kho mã ở dưới. */
@@ -67,10 +74,8 @@ export const stack = [
   'Java',
   'Android SDK',
   'Node.js',
-  'Express',
   'PostgreSQL',
   'PostGIS',
-  'React',
   'Firebase',
   'SQLite',
   'WebSocket',
@@ -211,7 +216,7 @@ export const projectGroups = [
         tags: ['React', 'TypeScript', 'Framer Motion', 'canvas-confetti'],
         repo: 'https://github.com/FLD-TN/L-X-Game-main',
         live: 'https://lixigame.vercel.app/',
-        screens: [],
+        screens: [{ src: '/screens/lixigame.jpg', label: 'Trang bóc lì xì Tết Bính Ngọ, đang chạy thật trên mạng' }],
         accentTilt: 6,
       },
     ],
